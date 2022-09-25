@@ -112,6 +112,18 @@ private extension DefaultNetworkService {
             guard let response = response as? HTTPURLResponse else {
                 throw NetworkError.invalidResponse
             }
+
+            NotificationCenter.default.post(
+                Notification(
+                    name: Notification.Name.VRNetworking.didCompleteRequest,
+                    object: nil,
+                    userInfo: [
+                        Notification.Key.data: data,
+                        Notification.Key.request: request,
+                        Notification.Key.response: response
+                    ]
+                )
+            )
             
             switch response.statusCode {
                 case 200...299:
