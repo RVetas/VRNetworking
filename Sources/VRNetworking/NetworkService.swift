@@ -18,13 +18,13 @@ public protocol NetworkService {
     
     func sendMultipartRequest<ResponseModel: Decodable>(
         parameters: RequestParameters,
-        multipartRequest: MultipartRequest,
+        multipartData: [MultipartData],
         responseModel: ResponseModel.Type
     ) async throws -> ResponseModel
     
     func sendMultipartRequest(
         parameters: RequestParameters,
-        multipartRequest: MultipartRequest
+        multipartData: [MultipartData]
     ) async throws -> Data
     
     func download(
@@ -68,12 +68,5 @@ public extension NetworkService {
         parameters: RequestParameters
     ) async throws -> Data {
         try await sendRequest(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
-    }
-    
-    func sendMultipartRequest(
-        parameters: RequestParameters,
-        multipartRequest: MultipartRequest
-    ) async throws {
-        _ = try await sendMultipartRequest(parameters: parameters, multipartRequest: multipartRequest)
     }
 }

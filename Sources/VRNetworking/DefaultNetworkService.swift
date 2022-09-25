@@ -73,10 +73,14 @@ public final class DefaultNetworkService: NetworkService {
     
     public func sendMultipartRequest<ResponseModel: Decodable>(
         parameters: RequestParameters,
-        multipartRequest: MultipartRequest,
+        multipartData: [MultipartData],
         responseModel: ResponseModel.Type
     ) async throws -> ResponseModel {
         var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
+        
+        let multipartRequest = MultipartRequest()
+        multipartData.forEach { _ = multipartRequest.adding(multipartData: $0) }
+        
         request.setValue("multipart/form-data; boundary=\(multipartRequest.boundary)", forHTTPHeaderField: "Content-Type")
         request.httpBody = multipartRequest.finalized().httpBody as Data
         
@@ -86,9 +90,13 @@ public final class DefaultNetworkService: NetworkService {
     
     public func sendMultipartRequest(
         parameters: RequestParameters,
-        multipartRequest: MultipartRequest
+        multipartData: [MultipartData]
     ) async throws -> Data {
         var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
+        
+        let multipartRequest = MultipartRequest()
+        multipartData.forEach { _ = multipartRequest.adding(multipartData: $0) }
+        
         request.setValue("multipart/form-data; boundary=\(multipartRequest.boundary)", forHTTPHeaderField: "Content-Type")
         request.httpBody = multipartRequest.finalized().httpBody as Data
         
