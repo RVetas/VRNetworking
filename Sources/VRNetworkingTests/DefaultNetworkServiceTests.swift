@@ -249,6 +249,78 @@ final class DefaultNetworkServiceTests: XCTestCase {
             XCTFail("Should not throw")
         }
     }
+    
+    func testInvalidDownloadResponseCall() async {
+        // given
+        networkHandlerMock.downloadForDelegateStub = (TestData.Download.url, TestData.Download.invalidResponse)
+        
+        do {
+            // when
+            _ = try await service.download(parameters: TestData.Download.requestParameters)
+        } catch {
+            guard case .invalidResponse = error as? NetworkError else {
+                XCTFail("Invalid error throws")
+                return
+            }
+            XCTAssertTrue(true)
+        }
+    }
+    
+    func testInvalidDownloadResponseCodeCall() async {
+        // given
+        networkHandlerMock.downloadForDelegateStub = (TestData.Download.url, TestData.Download.invalidResponseCode)
+        
+        do {
+            // when
+            _ = try await service.download(parameters: TestData.Download.requestParameters)
+        } catch {
+            guard case let .invalidResponseCode(responseCode: code) = error as? NetworkError else {
+                XCTFail("Invalid error throws")
+                return
+            }
+            XCTAssertEqual(code, 500)
+            XCTAssertTrue(true)
+        }
+    }
+    
+    func testThrowsDownloadCall() async {
+        // given
+        networkHandlerMock.downloadForDelegateThrowableError = ErrorDummy.err
+        
+        do {
+            // when
+            _ = try await service.download(parameters: TestData.Download.requestParameters)
+        } catch {
+            let kek = error
+            print(kek)
+            guard
+                case let .otherError(innerError) = error as? NetworkError,
+                case .err = innerError as? ErrorDummy
+            else {
+                XCTFail("Invalid error thrown")
+                return
+            }
+            
+            XCTAssertTrue(true)
+        }
+    }
+    
+    func testThrowsNetworkErrorDownloadCall() async {
+        // given
+        networkHandlerMock.downloadForDelegateThrowableError = NetworkError.invalidURL
+        
+        do {
+            // when
+            _ = try await service.download(parameters: TestData.Download.requestParameters)
+        } catch {
+            guard case .invalidURL = error as? NetworkError else {
+                XCTFail("Invalid error thrown")
+                return
+            }
+            
+            XCTAssertTrue(true)
+        }
+    }
 }
 
 struct EncodableDummy: Encodable { }
@@ -275,6 +347,12 @@ private extension DefaultNetworkServiceTests {
                 requestMethod: .get,
                 headers: nil
             )
+            
+            static let invalidResponse = URLResponse()
+            static let invalidResponseCode: HTTPURLResponse = {
+                let value = HTTPURLResponse(url: url, statusCode: 500, httpVersion: nil, headerFields: nil)
+                return value!
+            }()
         }
         
         enum InvalidURL {
