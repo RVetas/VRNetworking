@@ -228,6 +228,27 @@ final class DefaultNetworkServiceTests: XCTestCase {
             XCTFail("Method should not throw")
         }
     }
+    
+    /* MARK: -
+     public func download(
+         parameters: RequestParameters
+     ) async throws -> URL
+     */
+    func testValidDownloadCall() async {
+        // given
+        networkHandlerMock.downloadForDelegateStub = (TestData.Download.url, TestData.Download.response)
+
+        do {
+            // when
+            let result = try await service.download(parameters: TestData.Download.requestParameters)
+            
+            // then
+            XCTAssertEqual(result, TestData.Download.url)
+            XCTAssertEqual(networkHandlerMock.downloadForDelegateCallsCount, 1)
+        } catch {
+            XCTFail("Should not throw")
+        }
+    }
 }
 
 struct EncodableDummy: Encodable { }
@@ -242,6 +263,19 @@ private extension DefaultNetworkServiceTests {
         typealias ResponseType = Data
         
         static let data = "1234".data(using: .utf8)!
+        
+        enum Download {
+            static let url = URL(string: "https://example.com")!
+            static let response: HTTPURLResponse = {
+                let value = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
+                return value!
+            }()
+            static let requestParameters = RequestParameters(
+                endpoint: Endpoint(string: "https://google.com")!,
+                requestMethod: .get,
+                headers: nil
+            )
+        }
         
         enum InvalidURL {
             static let requestParameters = RequestParameters(

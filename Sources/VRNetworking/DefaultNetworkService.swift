@@ -40,6 +40,64 @@ public final class DefaultNetworkService: NetworkService {
         return try decode(model: ResponseModel.self, from: data)
     }
     
+    public func download(
+        parameters: RequestParameters
+    ) async throws -> URL {
+        let request = try request(
+            parameters: parameters,
+            body: nil,
+            requestModel: EncodableDummy.self
+        )
+        
+        do {
+            let (url, response) = try await networkHandler.download(for: request, delegate: nil)
+            guard let response = response as? HTTPURLResponse else {
+                throw NetworkError.invalidResponse
+            }
+            
+            switch response.statusCode {
+                case 200...299:
+                    return url
+                default:
+                    throw NetworkError.invalidResponseCode(responseCode: response.statusCode)
+            }
+            
+        } catch {
+            if type(of: error) != NetworkError.self {
+                throw NetworkError.otherError(error)
+            } else {
+                throw error
+            }
+        }
+    }
+    
+    public func sendMultipartRequest<ResponseModel: Decodable>(
+        parameters: RequestParameters,
+        multipartRequest: MultipartRequest,
+        responseModel: ResponseModel.Type
+    ) async throws -> ResponseModel {
+        var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
+        request.setValue("multipart/form-data; boundary=\(multipartRequest.boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = multipartRequest.finalized().httpBody as Data
+        
+        let (data, _) = try await send(request: request)
+        return try decode(model: ResponseModel.self, from: data)
+    }
+    
+    public func sendMultipartRequest(
+        parameters: RequestParameters,
+        multipartRequest: MultipartRequest
+    ) async throws -> Data {
+        var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
+        request.setValue("multipart/form-data; boundary=\(multipartRequest.boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = multipartRequest.finalized().httpBody as Data
+        
+        let (data, _) = try await send(request: request)
+        return data
+    }
+}
+
+private extension DefaultNetworkService {
     private func send(request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         do {
             let (data, response) = try await networkHandler.data(for: request, delegate: nil)
@@ -63,7 +121,7 @@ public final class DefaultNetworkService: NetworkService {
             }
         }
     }
-    
+
     private func request<RequestModel: Encodable>(
         parameters: RequestParameters,
         body: RequestModel?,
@@ -83,7 +141,7 @@ public final class DefaultNetworkService: NetworkService {
         
         return request
     }
-    
+
     private func encode<Model: Encodable>(model: Model) throws -> Data {
         do {
             return try encoder.encode(model)

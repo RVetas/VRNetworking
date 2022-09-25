@@ -4,4 +4,5 @@ import Foundation
 
 public protocol HandlesNetwork {
     func data(for request: URLRequest, delegate: URLSessionTaskDelegate?) async throws -> (Data, URLResponse)
+    func download(for request: URLRequest, delegate: URLSessionTaskDelegate?) async throws  -> (URL, URLResponse)
 }

@@ -36,5 +36,18 @@
 			<integer>0</integer>
 		</dict>
 	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>VRNetworking</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>VRNetworkingTests</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
 </dict>
 </plist>

@@ -29,6 +29,25 @@ final class EncoderMock: EncodesJSON {
 
 final class HandlesNetworkMock: HandlesNetwork {
     
+    var downloadForDelegateThrowableError: Error?
+    var downloadForDelegateReceivedRequest: URLRequest?
+    var downloadForDelegateReceivedDelegate: URLSessionTaskDelegate?
+    var downloadForDelegateStub: (URL, URLResponse)!
+    var downloadForDelegateCallsCount: Int = 0
+    
+    func download(for request: URLRequest, delegate: URLSessionTaskDelegate?) async throws -> (URL, URLResponse) {
+        if let downloadForDelegateThrowableError = downloadForDelegateThrowableError {
+            throw downloadForDelegateThrowableError
+        }
+        
+        downloadForDelegateReceivedRequest = request
+        downloadForDelegateReceivedDelegate = delegate
+        downloadForDelegateCallsCount += 1
+        
+        return downloadForDelegateStub!
+    }
+    
+    
     var dataForDelegateThrowableError: Error?
     var dataForDelegateCallsCount = 0
     var dataForDelegateCalled: Bool {
