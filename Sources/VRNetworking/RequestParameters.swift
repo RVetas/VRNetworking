@@ -21,11 +21,13 @@ public struct RequestParameters {
 
 public struct MultipartRequest {
     
+    public init() { }
+    
     public let boundary: String = UUID().uuidString
     public private(set) var httpBody = NSMutableData()
     
-    public func addingData(name: String, data: Data, mimeType: String) -> Self {
-        httpBody.append(dataForm(name: name, data: data, mimeType: mimeType))
+    public func addingData(name: String, fileName: String?, data: Data, mimeType: String) -> Self {
+        httpBody.append(dataForm(name: name, fileName: fileName, data: data, mimeType: mimeType))
         return self
     }
     
@@ -36,13 +38,19 @@ public struct MultipartRequest {
     
     private func dataForm(
         name: String,
+        fileName: String?,
         data: Data,
         mimeType: String
     ) -> Data {
         let field = NSMutableData()
         
         field.append("--\(boundary)\r\n")
-        field.append("Content-Disposition: form-data; name=\"\(name)\"\r\n")
+        if let fileName = fileName {
+            field.append("Content-Disposition: form-data; name=\"\(name)\"; filename=\"\(fileName)\"\r\n")
+        } else {
+            field.append("Content-Disposition: form-data; name=\"\(name)\"\r\n")
+        }
+        
         field.append("Content-Type: \(mimeType)\r\n")
         field.append("\r\n")
         field.append(data)
