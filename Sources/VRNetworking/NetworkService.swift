@@ -26,6 +26,10 @@ public protocol NetworkService {
         parameters: RequestParameters,
         multipartRequest: MultipartRequest
     ) async throws -> Data
+    
+    func download(
+        parameters: RequestParameters
+    ) async throws -> URL
 }
 
 public extension NetworkService {
