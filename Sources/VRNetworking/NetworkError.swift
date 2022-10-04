@@ -7,4 +7,9 @@ public enum NetworkError: Error {
     case decodingError(DecodingError?)
     case otherError(Error)
     case invalidResponseCode(responseCode: Int)
+    case apiError(String)
+}
+
+public struct APIError: Decodable {
+    public let message: String
 }

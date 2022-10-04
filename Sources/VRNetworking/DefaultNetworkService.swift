@@ -129,6 +129,12 @@ private extension DefaultNetworkService {
                 case 200...299:
                     return (data, response)
                     
+                case 500:
+                    guard let apiError = try? decode(model: APIError.self, from: data) else {
+                        throw NetworkError.invalidResponseCode(responseCode: response.statusCode)
+                    }
+                    throw NetworkError.apiError(apiError.message)
+                    
                 default:
                     throw NetworkError.invalidResponseCode(responseCode: response.statusCode)
             }
