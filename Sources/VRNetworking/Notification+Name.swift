@@ -15,6 +15,7 @@ public extension Notification.Name {
 
 public extension Notification {
     enum Key {
+        public static let url = "VRNetworking.notification.key.url"
         public static let data = "VRNetworking.notification.key.data"
         public static let request = "VRNetworking.notification.key.request"
         public static let response = "VRNetworking.notification.key.response"

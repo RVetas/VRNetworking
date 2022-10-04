@@ -55,6 +55,18 @@ public final class DefaultNetworkService: NetworkService {
                 throw NetworkError.invalidResponse
             }
             
+            NotificationCenter.default.post(
+                Notification(
+                    name: Notification.Name.VRNetworking.didCompleteRequest,
+                    object: nil,
+                    userInfo: [
+                        Notification.Key.url: url,
+                        Notification.Key.request: request,
+                        Notification.Key.response: response
+                    ]
+                )
+            )
+            
             switch response.statusCode {
                 case 200...299:
                     return url
