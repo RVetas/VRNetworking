@@ -10,7 +10,7 @@ public final class DefaultNetworkService: NetworkService {
     private let decoder: DecodesJSON
     
     public init(
-        networkHandler: HandlesNetwork = URLSession.shared,
+        networkHandler: HandlesNetwork = URLSession(configuration: URLSessionConfiguration.default),
         encoder: EncodesJSON = JSONEncoder(),
         decoder: DecodesJSON = JSONDecoder()
     ) {

@@ -39,7 +39,9 @@ final class DefaultNetworkServiceTests: XCTestCase {
         let encoder: JSONEncoder? = Mirror.value(of: service, forKey: "encoder")
         let decoder: JSONDecoder? = Mirror.value(of: service, forKey: "decoder")
         
-        XCTAssertIdentical(networkHandler, URLSession.shared)
+        XCTAssertNotNil(networkHandler)
+        XCTAssertEqual(networkHandler?.configuration, URLSessionConfiguration.default)
+        
         XCTAssertNotNil(encoder)
         XCTAssertNotNil(decoder)
     }
