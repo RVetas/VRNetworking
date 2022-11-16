@@ -30,3 +30,9 @@ public struct Endpoint {
         self.path = components.path
     }
 }
+
+extension Endpoint: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        "\(scheme)\(host)\(path)"
+    }
+}
