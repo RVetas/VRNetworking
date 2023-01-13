@@ -32,7 +32,7 @@ final class EndpointTests: XCTestCase {
 private extension EndpointTests {
     enum TestData {
         static let invalidString = "';dslf"
-        static let invalidHostString = "https://🧐/api/v1/method"
+        static let invalidHostString = "https://\\:2433/api/v1/method"
         static let invalidSchemeString = ";lk/example.com/api/v1/method"
         static let validString = "https://example.com/api/v1/method"
         static let scheme = "https"
