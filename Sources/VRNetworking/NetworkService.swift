@@ -2,6 +2,7 @@
 
 import Foundation
 
+// sourcery: NoMockable
 public protocol NetworkService {
     func sendRequest<RequestModel: Encodable, ResponseModel: Decodable>(
         parameters: RequestParameters,

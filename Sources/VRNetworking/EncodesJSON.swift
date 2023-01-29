@@ -2,6 +2,7 @@
 
 import Foundation
 
+// sourcery: NoMockable
 public protocol EncodesJSON {
     func encode<T>(_ value: T) throws -> Data where T: Encodable
 }

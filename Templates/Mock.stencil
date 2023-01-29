@@ -202,7 +202,7 @@ import {{ import }}
 {% macro underlyingMockedVariableName variable %}underlying{{ variable.name|upperFirstLetter }}{% endmacro %}
 {% macro mockedVariableName variable %}{{ variable.name }}{% endmacro %}
 
-{% for type in types.protocols %}{% if type.name != "AutoMockable" %}
+{% for type in types.protocols %}{% if type.name != "AutoMockable" and not type|annotated:"NoMockable" %}
 {% call accessLevel type.accessLevel %}class {{ type.name }}Mock: {{ type.name }} {
 
     {% if type.accessLevel == "public" %}public init() {}{% endif %}
