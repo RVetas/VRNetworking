@@ -7,7 +7,7 @@ This library's purpose is to make networking in an application easier. It provid
 ### Network Requests
 `DefaultNetworkService` is a basic entity that provides everything to build a request. 
 For example, if you need to send a get request and receive a model, you can do it this way:
-```Swift
+```swift
 struct ResponseModel: Decodable {
 	// ... some code ...
 }
@@ -36,7 +36,7 @@ Also, it is possible to configure body of the request, using `body` property alo
 ### Multipart Requests
 Another way to use `DefaultNetworkService` is sending multipart requests. It may be done like this:
 
-```Swift
+```swift
 struct ResponseModel: Decodable {
 	// ...
 }
@@ -65,7 +65,7 @@ do {
 ### Downloading files
 
 You can also download files with `DefaultNetworkService` using `.download(parameters:)` method:
-```Swift
+```swift
 let service = DefaultNetworkService()
 
 do {
