@@ -158,6 +158,30 @@ public class HandlesNetworkMock: HandlesNetwork {
     }
 
 }
+public class NetworkMiddlewareMock: NetworkMiddleware {
+
+    public init() {}
+
+
+
+    //MARK: - before
+
+    public var beforeRequestWithCallsCount = 0
+    public var beforeRequestWithCalled: Bool {
+        return beforeRequestWithCallsCount > 0
+    }
+    public var beforeRequestWithReceivedArguments: (request: URLRequest, parameters: RequestParameters)?
+    public var beforeRequestWithReceivedInvocations: [(request: URLRequest, parameters: RequestParameters)] = []
+    public var beforeRequestWithClosure: ((URLRequest, RequestParameters) -> Void)?
+
+    public func before(request: URLRequest, with parameters: RequestParameters) {
+        beforeRequestWithCallsCount += 1
+        beforeRequestWithReceivedArguments = (request: request, parameters: parameters)
+        beforeRequestWithReceivedInvocations.append((request: request, parameters: parameters))
+        beforeRequestWithClosure?(request, parameters)
+    }
+
+}
 public class NetworkServiceMock: NetworkService {
 
     public init() {}
