@@ -8,15 +8,18 @@ public final class DefaultNetworkService: NetworkService {
     private let networkHandler: HandlesNetwork
     private let encoder: EncodesJSON
     private let decoder: DecodesJSON
+	private let middlewares: [NetworkMiddleware]
     
     public init(
         networkHandler: HandlesNetwork = URLSession(configuration: URLSessionConfiguration.default),
         encoder: EncodesJSON = JSONEncoder(),
-        decoder: DecodesJSON = JSONDecoder()
+        decoder: DecodesJSON = JSONDecoder(),
+		middlewares: [NetworkMiddleware] = []
     ) {
         self.networkHandler = networkHandler
         self.encoder = encoder
         self.decoder = decoder
+		self.middlewares = middlewares
     }
     
     public func sendRequest<RequestModel: Encodable>(
@@ -25,6 +28,7 @@ public final class DefaultNetworkService: NetworkService {
         requestModel: RequestModel.Type?
     ) async throws -> Data {
         let request = try request(parameters: parameters, body: body, requestModel: RequestModel.self)
+		middlewares.forEach { $0.before(request: request, with: parameters) }
         return (try await send(request: request)).0
     }
     
@@ -35,6 +39,7 @@ public final class DefaultNetworkService: NetworkService {
         responseModel: ResponseModel.Type
     ) async throws -> ResponseModel {
         let request = try request(parameters: parameters, body: body, requestModel: RequestModel.self)
+		middlewares.forEach { $0.before(request: request, with: parameters) }
         let (data, _) = try await send(request: request)
         
         return try decode(model: ResponseModel.self, from: data)
@@ -48,7 +53,7 @@ public final class DefaultNetworkService: NetworkService {
             body: nil,
             requestModel: EncodableDummy.self
         )
-        
+		middlewares.forEach { $0.before(request: request, with: parameters) }
         do {
             let (url, response) = try await networkHandler.download(for: request, delegate: nil)
             guard let response = response as? HTTPURLResponse else {
@@ -89,7 +94,7 @@ public final class DefaultNetworkService: NetworkService {
         responseModel: ResponseModel.Type
     ) async throws -> ResponseModel {
         var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
-        
+		middlewares.forEach { $0.before(request: request, with: parameters) }
         let multipartRequest = MultipartRequest()
         multipartData.forEach { _ = multipartRequest.adding(multipartData: $0) }
         
@@ -105,7 +110,7 @@ public final class DefaultNetworkService: NetworkService {
         multipartData: [MultipartData]
     ) async throws -> Data {
         var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
-        
+		middlewares.forEach { $0.before(request: request, with: parameters) }
         let multipartRequest = MultipartRequest()
         multipartData.forEach { _ = multipartRequest.adding(multipartData: $0) }
         
