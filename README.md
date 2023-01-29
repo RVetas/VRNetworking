@@ -4,7 +4,7 @@ This library's purpose is to make networking in an application easier. It provid
 
 ## How-to
 
-### Simple Network Requests
+### Network Requests
 `DefaultNetworkService` is a basic entity that provides everything to build a request. 
 For example, if you need to send a get request and receive a model, you can do it this way:
 ```Swift
@@ -85,3 +85,30 @@ do {
 	// error handling
 }
 ```
+
+### Middlewares
+
+#### Interface
+
+```swift
+public protocol NetworkMiddleware {
+	func before(request: URLRequest, with parameters: RequestParameters)
+	func onError(_ error: Error, requestParameters: RequestParameters)
+}
+```
+
+#### Usage
+
+Middlewares allow you to attach additional logic to your service. E.g. logging requests parameters or logging errors could be implemented using a middleware.
+
+```swift
+final class ErrorLoggingMiddleware: NetworkMiddleware {
+	func onError(_ error: Error, requestParameters: RequestParameters) {
+		SomeLogger().log(error)
+	}
+}
+
+// This service will call ErrorLoggingMiddleWare.onError every time error occurs
+let service = DefaultNetworkService(middlewares: [ErrorLoggingMiddleware()])
+```
+
