@@ -2,7 +2,7 @@
 
 import Foundation
 
-public struct Endpoint {
+public struct Endpoint: Equatable {
     public let scheme: String
     public let host: String
     public let path: String

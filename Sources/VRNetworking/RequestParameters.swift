@@ -2,7 +2,7 @@
 
 import Foundation
 
-public struct RequestParameters {
+public struct RequestParameters: Equatable {
     
     public let endpoint: Endpoint
     public let requestMethod: HTTPRequestMethod

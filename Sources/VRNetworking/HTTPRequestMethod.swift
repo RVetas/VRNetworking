@@ -1,6 +1,6 @@
 // Created by Рамазанов Виталий Глебович on 18/09/22
 
-public enum HTTPRequestMethod: String {
+public enum HTTPRequestMethod: String, Equatable {
     case get = "GET"
     case post = "POST"
     case put = "PUT"

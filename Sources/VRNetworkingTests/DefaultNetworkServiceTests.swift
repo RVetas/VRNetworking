@@ -8,16 +8,20 @@ final class DefaultNetworkServiceTests: XCTestCase {
     var service: DefaultNetworkService!
     var networkHandlerMock: HandlesNetworkMock!
     var encoderMock: EncoderMock!
+	var middlewareMock: NetworkMiddlewareMock!
     fileprivate var decoderMock: DecoderMock<TestData.ResponseType>!
     
     override func setUp() {
         networkHandlerMock = HandlesNetworkMock()
         encoderMock = EncoderMock()
         decoderMock = DecoderMock<TestData.ResponseType>()
+		middlewareMock = NetworkMiddlewareMock()
+		
         service = DefaultNetworkService(
             networkHandler: networkHandlerMock!,
             encoder: encoderMock,
-            decoder: decoderMock
+            decoder: decoderMock,
+			middlewares: [middlewareMock]
         )
     }
     
@@ -78,6 +82,9 @@ final class DefaultNetworkServiceTests: XCTestCase {
             XCTAssertEqual(encoderMock.encodeWasCalled, 1)
             XCTAssertEqual(decoderMock.decodeWasCalled, 1)
             XCTAssertEqual(response, decoderMock.decodeStub)
+			XCTAssertEqual(middlewareMock.beforeRequestWithCallsCount, 1)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
         } catch {
             XCTFail("Method should not throw")
         }
@@ -151,6 +158,8 @@ final class DefaultNetworkServiceTests: XCTestCase {
                 responseModel: TestData.ResponseType.self
             )
         } catch {
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
             if case let .invalidResponseCode(responseCode: code) = error as? NetworkError {
                 XCTAssertEqual(code, 500)
             } else {
@@ -173,6 +182,8 @@ final class DefaultNetworkServiceTests: XCTestCase {
                 responseModel: TestData.ResponseType.self
             )
         } catch {
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
             if case .invalidResponse = error as? NetworkError {
                 XCTAssertTrue(true)
             } else {
@@ -195,6 +206,8 @@ final class DefaultNetworkServiceTests: XCTestCase {
                 responseModel: TestData.ResponseType.self
             )
         } catch {
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
             if
                 case let .otherError(error) = error as? NetworkError,
                 case .err = error as? ErrorDummy
@@ -226,6 +239,8 @@ final class DefaultNetworkServiceTests: XCTestCase {
             XCTAssertEqual(networkHandlerMock.dataForDelegateCallsCount, 1)
             XCTAssertEqual(networkHandlerMock.dataForDelegateReceivedArguments!.request, TestData.ValidData.expectedRequest)
             XCTAssertNil(networkHandlerMock.dataForDelegateReceivedArguments!.delegate)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
         } catch {
             XCTFail("Method should not throw")
         }
@@ -247,6 +262,8 @@ final class DefaultNetworkServiceTests: XCTestCase {
             // then
             XCTAssertEqual(result, TestData.Download.url)
             XCTAssertEqual(networkHandlerMock.downloadForDelegateCallsCount, 1)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
         } catch {
             XCTFail("Should not throw")
         }
@@ -260,6 +277,8 @@ final class DefaultNetworkServiceTests: XCTestCase {
             // when
             _ = try await service.download(parameters: TestData.Download.requestParameters)
         } catch {
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
             guard case .invalidResponse = error as? NetworkError else {
                 XCTFail("Invalid error throws")
                 return
@@ -276,6 +295,8 @@ final class DefaultNetworkServiceTests: XCTestCase {
             // when
             _ = try await service.download(parameters: TestData.Download.requestParameters)
         } catch {
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
             guard case let .invalidResponseCode(responseCode: code) = error as? NetworkError else {
                 XCTFail("Invalid error throws")
                 return
@@ -293,8 +314,8 @@ final class DefaultNetworkServiceTests: XCTestCase {
             // when
             _ = try await service.download(parameters: TestData.Download.requestParameters)
         } catch {
-            let kek = error
-            print(kek)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
             guard
                 case let .otherError(innerError) = error as? NetworkError,
                 case .err = innerError as? ErrorDummy
@@ -315,6 +336,8 @@ final class DefaultNetworkServiceTests: XCTestCase {
             // when
             _ = try await service.download(parameters: TestData.Download.requestParameters)
         } catch {
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.parameters, TestData.ValidData.requestParameters)
+			XCTAssertEqual(middlewareMock.beforeRequestWithReceivedArguments?.request, TestData.ValidData.expectedRequest)
             guard case .invalidURL = error as? NetworkError else {
                 XCTFail("Invalid error thrown")
                 return
