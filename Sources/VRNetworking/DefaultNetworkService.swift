@@ -27,9 +27,14 @@ public final class DefaultNetworkService: NetworkService {
         body: RequestModel?,
         requestModel: RequestModel.Type?
     ) async throws -> Data {
-        let request = try request(parameters: parameters, body: body, requestModel: RequestModel.self)
-		middlewares.forEach { $0.before(request: request, with: parameters) }
-        return (try await send(request: request)).0
+		do {
+			let request = try request(parameters: parameters, body: body, requestModel: RequestModel.self)
+			middlewares.forEach { $0.before(request: request, with: parameters) }
+			return (try await send(request: request)).0
+		} catch {
+			middlewares.forEach { $0.onError(error, requestParameters: parameters) }
+			throw error
+		}
     }
     
     public func sendRequest<RequestModel: Encodable, ResponseModel: Decodable>(
@@ -38,54 +43,61 @@ public final class DefaultNetworkService: NetworkService {
         requestModel: RequestModel.Type?,
         responseModel: ResponseModel.Type
     ) async throws -> ResponseModel {
-        let request = try request(parameters: parameters, body: body, requestModel: RequestModel.self)
-		middlewares.forEach { $0.before(request: request, with: parameters) }
-        let (data, _) = try await send(request: request)
-        
-        return try decode(model: ResponseModel.self, from: data)
+		do {
+			let request = try request(parameters: parameters, body: body, requestModel: RequestModel.self)
+			middlewares.forEach { $0.before(request: request, with: parameters) }
+			let (data, _) = try await send(request: request)
+			
+			return try decode(model: ResponseModel.self, from: data)
+		} catch {
+			middlewares.forEach { $0.onError(error, requestParameters: parameters) }
+			throw error
+		}
     }
     
     public func download(
         parameters: RequestParameters
     ) async throws -> URL {
-        let request = try request(
-            parameters: parameters,
-            body: nil,
-            requestModel: EncodableDummy.self
-        )
-		middlewares.forEach { $0.before(request: request, with: parameters) }
-        do {
-            let (url, response) = try await networkHandler.download(for: request, delegate: nil)
-            guard let response = response as? HTTPURLResponse else {
-                throw NetworkError.invalidResponse
-            }
-            
-            NotificationCenter.default.post(
-                Notification(
-                    name: Notification.Name.VRNetworking.didCompleteRequest,
-                    object: nil,
-                    userInfo: [
-                        Notification.Key.url: url,
-                        Notification.Key.request: request,
-                        Notification.Key.response: response
-                    ]
-                )
-            )
-            
-            switch response.statusCode {
-                case 200...299:
-                    return url
-                default:
-                    throw NetworkError.invalidResponseCode(responseCode: response.statusCode)
-            }
-            
-        } catch {
-            if type(of: error) != NetworkError.self {
-                throw NetworkError.otherError(error)
-            } else {
-                throw error
-            }
-        }
+		do {
+			let request = try request(
+				parameters: parameters,
+				body: nil,
+				requestModel: EncodableDummy.self
+			)
+			middlewares.forEach { $0.before(request: request, with: parameters) }
+			let (url, response) = try await networkHandler.download(for: request, delegate: nil)
+			guard let response = response as? HTTPURLResponse else {
+				throw NetworkError.invalidResponse
+			}
+			
+			NotificationCenter.default.post(
+				Notification(
+					name: Notification.Name.VRNetworking.didCompleteRequest,
+					object: nil,
+					userInfo: [
+						Notification.Key.url: url,
+						Notification.Key.request: request,
+						Notification.Key.response: response
+					]
+				)
+			)
+			
+			switch response.statusCode {
+				case 200...299:
+					return url
+				default:
+					throw NetworkError.invalidResponseCode(responseCode: response.statusCode)
+			}
+		} catch {
+			let errorToThrow: Error
+			if type(of: error) != NetworkError.self {
+				errorToThrow = NetworkError.otherError(error)
+			} else {
+				errorToThrow = error
+			}
+			middlewares.forEach { $0.onError(errorToThrow, requestParameters: parameters) }
+			throw errorToThrow
+		}
     }
     
     public func sendMultipartRequest<ResponseModel: Decodable>(
@@ -93,32 +105,42 @@ public final class DefaultNetworkService: NetworkService {
         multipartData: [MultipartData],
         responseModel: ResponseModel.Type
     ) async throws -> ResponseModel {
-        var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
-		middlewares.forEach { $0.before(request: request, with: parameters) }
-        let multipartRequest = MultipartRequest()
-        multipartData.forEach { _ = multipartRequest.adding(multipartData: $0) }
-        
-        request.setValue("multipart/form-data; boundary=\(multipartRequest.boundary)", forHTTPHeaderField: "Content-Type")
-        request.httpBody = multipartRequest.finalized().httpBody as Data
-        
-        let (data, _) = try await send(request: request)
-        return try decode(model: ResponseModel.self, from: data)
+		do {
+			var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
+			middlewares.forEach { $0.before(request: request, with: parameters) }
+			let multipartRequest = MultipartRequest()
+			multipartData.forEach { _ = multipartRequest.adding(multipartData: $0) }
+			
+			request.setValue("multipart/form-data; boundary=\(multipartRequest.boundary)", forHTTPHeaderField: "Content-Type")
+			request.httpBody = multipartRequest.finalized().httpBody as Data
+			
+			let (data, _) = try await send(request: request)
+			return try decode(model: ResponseModel.self, from: data)
+		} catch {
+			middlewares.forEach { $0.onError(error, requestParameters: parameters) }
+			throw error
+		}
     }
     
     public func sendMultipartRequest(
         parameters: RequestParameters,
         multipartData: [MultipartData]
     ) async throws -> Data {
-        var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
-		middlewares.forEach { $0.before(request: request, with: parameters) }
-        let multipartRequest = MultipartRequest()
-        multipartData.forEach { _ = multipartRequest.adding(multipartData: $0) }
-        
-        request.setValue("multipart/form-data; boundary=\(multipartRequest.boundary)", forHTTPHeaderField: "Content-Type")
-        request.httpBody = multipartRequest.finalized().httpBody as Data
-        
-        let (data, _) = try await send(request: request)
-        return data
+		do {
+			var request = try request(parameters: parameters, body: nil, requestModel: EncodableDummy.self)
+			middlewares.forEach { $0.before(request: request, with: parameters) }
+			let multipartRequest = MultipartRequest()
+			multipartData.forEach { _ = multipartRequest.adding(multipartData: $0) }
+			
+			request.setValue("multipart/form-data; boundary=\(multipartRequest.boundary)", forHTTPHeaderField: "Content-Type")
+			request.httpBody = multipartRequest.finalized().httpBody as Data
+			
+			let (data, _) = try await send(request: request)
+			return data
+		} catch {
+			middlewares.forEach { $0.onError(error, requestParameters: parameters) }
+			throw error
+		}
     }
 }
 

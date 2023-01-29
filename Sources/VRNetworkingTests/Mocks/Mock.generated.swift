@@ -116,4 +116,21 @@ public class NetworkMiddlewareMock: NetworkMiddleware {
         beforeRequestWithClosure?(request, parameters)
     }
 
+    //MARK: - onError
+
+    public var onErrorRequestParametersCallsCount = 0
+    public var onErrorRequestParametersCalled: Bool {
+        return onErrorRequestParametersCallsCount > 0
+    }
+    public var onErrorRequestParametersReceivedArguments: (error: Error, requestParameters: RequestParameters)?
+    public var onErrorRequestParametersReceivedInvocations: [(error: Error, requestParameters: RequestParameters)] = []
+    public var onErrorRequestParametersClosure: ((Error, RequestParameters) -> Void)?
+
+    public func onError(_ error: Error, requestParameters: RequestParameters) {
+        onErrorRequestParametersCallsCount += 1
+        onErrorRequestParametersReceivedArguments = (error: error, requestParameters: requestParameters)
+        onErrorRequestParametersReceivedInvocations.append((error: error, requestParameters: requestParameters))
+        onErrorRequestParametersClosure?(error, requestParameters)
+    }
+
 }

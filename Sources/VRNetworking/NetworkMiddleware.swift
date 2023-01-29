@@ -9,4 +9,5 @@ import Foundation
 
 public protocol NetworkMiddleware {
 	func before(request: URLRequest, with parameters: RequestParameters)
+	func onError(_ error: Error, requestParameters: RequestParameters)
 }
