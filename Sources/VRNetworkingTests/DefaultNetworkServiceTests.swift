@@ -238,7 +238,7 @@ final class DefaultNetworkServiceTests: XCTestCase {
      */
     func testValidDownloadCall() async {
         // given
-        networkHandlerMock.downloadForDelegateStub = (TestData.Download.url, TestData.Download.response)
+        networkHandlerMock.downloadForDelegateReturnValue = (TestData.Download.url, TestData.Download.response)
 
         do {
             // when
@@ -254,7 +254,7 @@ final class DefaultNetworkServiceTests: XCTestCase {
     
     func testInvalidDownloadResponseCall() async {
         // given
-        networkHandlerMock.downloadForDelegateStub = (TestData.Download.url, TestData.Download.invalidResponse)
+        networkHandlerMock.downloadForDelegateReturnValue = (TestData.Download.url, TestData.Download.invalidResponse)
         
         do {
             // when
@@ -270,7 +270,7 @@ final class DefaultNetworkServiceTests: XCTestCase {
     
     func testInvalidDownloadResponseCodeCall() async {
         // given
-        networkHandlerMock.downloadForDelegateStub = (TestData.Download.url, TestData.Download.invalidResponseCode)
+        networkHandlerMock.downloadForDelegateReturnValue = (TestData.Download.url, TestData.Download.invalidResponseCode)
         
         do {
             // when
