@@ -27,6 +27,12 @@ final class EndpointTests: XCTestCase {
         // then
         XCTAssertNil(Endpoint(string: TestData.invalidSchemeString))
     }
+	
+	func testWithQuery() {
+		let endpoint = Endpoint(string: TestData.withQuery)
+		XCTAssertEqual(endpoint?.query, TestData.expectedQuery)
+		XCTAssertEqual(URLComponents(from: endpoint!).queryItems, TestData.expectedQueryItems)
+	}
 }
 
 private extension EndpointTests {
@@ -38,5 +44,8 @@ private extension EndpointTests {
         static let scheme = "https"
         static let host = "example.com"
         static let path = "/api/v1/method"
+		static let withQuery = "https://example.com/api/v1/method?item=value"
+		static let expectedQuery = ["item": "value"]
+		static let expectedQueryItems = [URLQueryItem(name: "item", value: "value")]
     }
 }

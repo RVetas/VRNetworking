@@ -6,15 +6,18 @@ public struct Endpoint: Equatable {
     public let scheme: String
     public let host: String
     public let path: String
-
+	public let query: [String: String?]
+	
     public init(
         scheme: String,
         host: String,
-        path: String
+        path: String,
+		query: [String: String?] = [:]
     ) {
         self.scheme = scheme
         self.host = host
         self.path = path
+		self.query = query
     }
     
     public init?(string: String) {
@@ -28,6 +31,9 @@ public struct Endpoint: Equatable {
         self.scheme = scheme
         self.host = host
         self.path = components.path
+		self.query = components.queryItems?.compactMap { $0 }.reduce(into: [String: String?]()) { dictionary, query in
+			dictionary[query.name] = query.value
+		} ?? [String: String?]()
     }
 }
 
