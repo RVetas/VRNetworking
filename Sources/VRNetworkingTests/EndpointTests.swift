@@ -33,6 +33,16 @@ final class EndpointTests: XCTestCase {
 		XCTAssertEqual(endpoint?.query, TestData.expectedQuery)
 		XCTAssertEqual(URLComponents(from: endpoint!).queryItems, TestData.expectedQueryItems)
 	}
+	
+	func testWithEmptyQueryFullInit() {
+		let endpoint = Endpoint(scheme: "https", host: "example.com", path: "")
+		XCTAssertEqual(URLComponents(from: endpoint).url?.absoluteString, "https://example.com")
+	}
+	
+	func testWithEmptyQueryStringInit() {
+		let endpoint = Endpoint(string: "https://example.com")
+		XCTAssertEqual(URLComponents(from: endpoint!).url?.absoluteString, "https://example.com")
+	}
 }
 
 private extension EndpointTests {
