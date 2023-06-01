@@ -8,7 +8,7 @@ public extension URLComponents {
         scheme = endpoint.scheme
         host = endpoint.host
         path = endpoint.path
-		queryItems = endpoint.query.map {
+		percentEncodedQueryItems = endpoint.query.map {
 			URLQueryItem(name: $0, value: $1)
 		}
     }
