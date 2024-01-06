@@ -86,7 +86,7 @@ public final class DefaultNetworkService: NetworkService {
 				case 200...299:
 					return url
 				default:
-					throw NetworkError.invalidResponseCode(responseCode: response.statusCode)
+					throw NetworkError.invalidResponseCode(responseCode: response.statusCode, response: response)
 			}
 		} catch {
 			let errorToThrow: Error
@@ -170,12 +170,12 @@ private extension DefaultNetworkService {
                     
                 case 500:
                     guard let apiError = try? decode(model: APIError.self, from: data) else {
-                        throw NetworkError.invalidResponseCode(responseCode: response.statusCode)
+                        throw NetworkError.invalidResponseCode(responseCode: response.statusCode, response: response)
                     }
-                    throw NetworkError.apiError(apiError.message)
+					throw NetworkError.apiError(message: apiError.message, response: response)
                     
                 default:
-                    throw NetworkError.invalidResponseCode(responseCode: response.statusCode)
+                    throw NetworkError.invalidResponseCode(responseCode: response.statusCode, response: response)
             }
             
         } catch {

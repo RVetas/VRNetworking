@@ -168,7 +168,7 @@ final class DefaultNetworkServiceTests: XCTestCase {
 			XCTAssertEqual(middlewareMock.onErrorRequestParametersCallsCount, 1)
 			XCTAssertEqual(middlewareMock.onErrorRequestParametersReceivedArguments?.requestParameters, TestData.ValidData.requestParameters)
 			XCTAssertTrue(middlewareMock.onErrorRequestParametersReceivedArguments?.error is NetworkError)
-            if case let .invalidResponseCode(responseCode: code) = error as? NetworkError {
+			if case let .invalidResponseCode(responseCode: code, response: _) = error as? NetworkError {
                 XCTAssertEqual(code, 500)
             } else {
                 XCTFail("Method should throw invalidResponseCode error")
@@ -317,7 +317,7 @@ final class DefaultNetworkServiceTests: XCTestCase {
 			XCTAssertEqual(middlewareMock.onErrorRequestParametersCallsCount, 1)
 			XCTAssertEqual(middlewareMock.onErrorRequestParametersReceivedArguments?.requestParameters, TestData.ValidData.requestParameters)
 			XCTAssertTrue(middlewareMock.onErrorRequestParametersReceivedArguments?.error is NetworkError)
-            guard case let .invalidResponseCode(responseCode: code) = error as? NetworkError else {
+			guard case let .invalidResponseCode(responseCode: code, response: _) = error as? NetworkError else {
                 XCTFail("Invalid error throws")
                 return
             }
