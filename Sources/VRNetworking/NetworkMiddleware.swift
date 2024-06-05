@@ -16,5 +16,5 @@ public protocol NetworkMiddleware {
 public extension NetworkMiddleware {
 	func before(request: URLRequest, with parameters: RequestParameters) { }
 	func onError(_ error: Error, requestParameters: RequestParameters) { }
-	func onFinish(data: Data, response: HTTPURLResponse) { }
+	func onFinish(request: URLRequest, data: Data, response: HTTPURLResponse) { }
 }
