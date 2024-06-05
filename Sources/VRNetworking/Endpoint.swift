@@ -6,17 +6,20 @@ public struct Endpoint: Equatable {
     public let scheme: String
     public let host: String
     public let path: String
+	public let port: Int?
 	public let query: [String: String?]?
 	
     public init(
         scheme: String,
         host: String,
         path: String,
+		port: Int? = nil,
 		query: [String: String?]? = nil
     ) {
         self.scheme = scheme
         self.host = host
         self.path = path
+		self.port = port
 		self.query = query
     }
     
@@ -31,6 +34,7 @@ public struct Endpoint: Equatable {
         self.scheme = scheme
         self.host = host
         self.path = components.path
+		self.port = components.port
 		self.query = components.queryItems?.compactMap { $0 }.reduce(into: [String: String?]()) { dictionary, query in
 			dictionary[query.name] = query.value
 		}
@@ -39,6 +43,6 @@ public struct Endpoint: Equatable {
 
 extension Endpoint: CustomDebugStringConvertible {
     public var debugDescription: String {
-        "\(scheme)\(host)\(path)"
+		"\(scheme)\(host)\(port.flatMap { ":\($0.description)" } ?? "")\(path)"
     }
 }

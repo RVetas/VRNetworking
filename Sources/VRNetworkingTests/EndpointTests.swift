@@ -43,6 +43,11 @@ final class EndpointTests: XCTestCase {
 		let endpoint = Endpoint(string: "https://example.com")
 		XCTAssertEqual(URLComponents(from: endpoint!).url?.absoluteString, "https://example.com")
 	}
+	
+	func testWithPort() {
+		let endpoint = Endpoint(string: TestData.localhostWithPort)!
+		XCTAssertEqual(URLComponents(from: endpoint).url?.absoluteString, TestData.localhostWithPort)
+	}
 }
 
 private extension EndpointTests {
@@ -57,5 +62,6 @@ private extension EndpointTests {
 		static let withQuery = "https://example.com/api/v1/method?item=value"
 		static let expectedQuery = ["item": "value"]
 		static let expectedQueryItems = [URLQueryItem(name: "item", value: "value")]
+		static let localhostWithPort = "http://localhost:1234/api/v1/method?item=value"
     }
 }
