@@ -30,7 +30,8 @@ public final class DefaultNetworkService: NetworkService {
 		do {
 			let request = try request(parameters: parameters, body: body, requestModel: RequestModel.self)
 			middlewares.forEach { $0.before(request: request, with: parameters) }
-			return (try await send(request: request)).0
+			let (data, _) = try await send(request: request)
+			return data
 		} catch {
 			middlewares.forEach { $0.onError(error, requestParameters: parameters) }
 			throw error
@@ -47,7 +48,6 @@ public final class DefaultNetworkService: NetworkService {
 			let request = try request(parameters: parameters, body: body, requestModel: RequestModel.self)
 			middlewares.forEach { $0.before(request: request, with: parameters) }
 			let (data, _) = try await send(request: request)
-			
 			return try decode(model: ResponseModel.self, from: data)
 		} catch {
 			middlewares.forEach { $0.onError(error, requestParameters: parameters) }
@@ -69,7 +69,7 @@ public final class DefaultNetworkService: NetworkService {
 			guard let response = response as? HTTPURLResponse else {
 				throw NetworkError.invalidResponse
 			}
-			
+
 			NotificationCenter.default.post(
 				Notification(
 					name: Notification.Name.VRNetworking.didCompleteRequest,
@@ -81,6 +81,13 @@ public final class DefaultNetworkService: NetworkService {
 					]
 				)
 			)
+			middlewares.forEach {
+				$0.onFinish(
+					request: request,
+					data: url.absoluteString.data(using: .utf8) ?? Data(),
+					response: response
+				)
+			}
 			
 			switch response.statusCode {
 				case 200...299:
@@ -163,6 +170,7 @@ private extension DefaultNetworkService {
                     ]
                 )
             )
+			middlewares.forEach { $0.onFinish(request: request, data: data, response: response) }
             
             switch response.statusCode {
                 case 200...299:

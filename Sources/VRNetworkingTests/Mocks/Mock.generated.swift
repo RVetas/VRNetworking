@@ -133,4 +133,38 @@ public class NetworkMiddlewareMock: NetworkMiddleware {
         onErrorRequestParametersClosure?(error, requestParameters)
     }
 
+    //MARK: - onFinish
+
+    public var onFinishRequestDataResponseCallsCount = 0
+    public var onFinishRequestDataResponseCalled: Bool {
+        return onFinishRequestDataResponseCallsCount > 0
+    }
+    public var onFinishRequestDataResponseReceivedArguments: (request: URLRequest, data: Data, response: HTTPURLResponse)?
+    public var onFinishRequestDataResponseReceivedInvocations: [(request: URLRequest, data: Data, response: HTTPURLResponse)] = []
+    public var onFinishRequestDataResponseClosure: ((URLRequest, Data, HTTPURLResponse) -> Void)?
+
+    public func onFinish(request: URLRequest, data: Data, response: HTTPURLResponse) {
+        onFinishRequestDataResponseCallsCount += 1
+        onFinishRequestDataResponseReceivedArguments = (request: request, data: data, response: response)
+        onFinishRequestDataResponseReceivedInvocations.append((request: request, data: data, response: response))
+        onFinishRequestDataResponseClosure?(request, data, response)
+    }
+
+    //MARK: - onDownload
+
+    public var onDownloadResponseCallsCount = 0
+    public var onDownloadResponseCalled: Bool {
+        return onDownloadResponseCallsCount > 0
+    }
+    public var onDownloadResponseReceivedResponse: HTTPURLResponse?
+    public var onDownloadResponseReceivedInvocations: [HTTPURLResponse] = []
+    public var onDownloadResponseClosure: ((HTTPURLResponse) -> Void)?
+
+    public func onDownload(response: HTTPURLResponse) {
+        onDownloadResponseCallsCount += 1
+        onDownloadResponseReceivedResponse = response
+        onDownloadResponseReceivedInvocations.append(response)
+        onDownloadResponseClosure?(response)
+    }
+
 }
