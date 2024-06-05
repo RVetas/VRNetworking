@@ -12,14 +12,14 @@ public struct Endpoint: Equatable {
     public init(
         scheme: String,
         host: String,
-        path: String,
 		port: Int? = nil,
+        path: String,
 		query: [String: String?]? = nil
     ) {
         self.scheme = scheme
         self.host = host
-        self.path = path
 		self.port = port
+        self.path = path
 		self.query = query
     }
     
